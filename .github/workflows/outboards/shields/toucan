@@ -1,0 +1,9 @@
+# Copyright 2026 Manna Harbour
+# https://github.com/manna-harbour/miryoku
+
+# beekeeb Toucan2. Use with board seeeduino_xiao_ble and shields
+# "toucan_left rgbled_adapter nice_view_gem" and "toucan_right rgbled_adapter".
+# Pinned to ZMK v0.3 to match the vendor modules.
+
+outboard_branches=zmkfirmware/zmk/v0.3
+outboard_modules="beekeeb/zmk-keyboard-toucan2/main beekeeb/zmk_driver_azoteq/main beekeeb/zmk-input-zoom/main caksoylar/zmk-rgbled-widget/v0.3"

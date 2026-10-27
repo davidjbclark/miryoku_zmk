@@ -1,0 +1,36 @@
+// Copyright 2026 Manna Harbour
+// https://github.com/manna-harbour/miryoku
+
+#include "../miryoku/custom_config.h"
+#include "../miryoku/mapping/42/corne.h"
+#include "../miryoku/miryoku.dtsi"
+
+// Trackpad: the vendor shield refers to its own layer indices, remap them to Miryoku layers.
+
+#define U_TOUCH 10
+
+/ {
+  keymap {
+    touch {
+      display-name = "Touch";
+      bindings = <
+&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
+                   U_BTN3 U_BTN1 U_BTN2  U_BTN1 U_BTN2 U_BTN3
+      >;
+    };
+  };
+};
+
+// thumb keys become mouse buttons while touching the trackpad
+&is_touching_processor {
+  bindings = <&mo U_TOUCH>;
+};
+
+// trackpad scrolls while the Nav layer is held
+&trackpad_listener {
+  scroller {
+    layers = <U_NAV>;
+  };
+};
