@@ -3,34 +3,165 @@
 
 #include "../miryoku/custom_config.h"
 #include "../miryoku/mapping/42/corne.h"
+
+// macOS by default; double-tap the Media layer left inner top key to toggle Windows mode.
+// Windows mode switches the clipboard keys and the trackpad zoom and swipe shortcuts.
+// Layer locks (double-tap Base, Nav, etc.) reset to macOS.
+
+#define MIRYOKU_CLIPBOARD_MAC
+
+#define MIRYOKU_LAYER_LIST \
+MIRYOKU_X(BASE,       "Base") \
+MIRYOKU_X(WIN,        "Win") \
+MIRYOKU_X(EXTRA,      "Extra") \
+MIRYOKU_X(TAP,        "Tap") \
+MIRYOKU_X(BUTTON,     "Button") \
+MIRYOKU_X(NAV,        "Nav") \
+MIRYOKU_X(MOUSE,      "Mouse") \
+MIRYOKU_X(MEDIA,      "Media") \
+MIRYOKU_X(NUM,        "Num") \
+MIRYOKU_X(SYM,        "Sym") \
+MIRYOKU_X(FUN,        "Fun") \
+MIRYOKU_X(BUTTON_WIN, "Button") \
+MIRYOKU_X(NAV_WIN,    "Nav") \
+MIRYOKU_X(MOUSE_WIN,  "Mouse") \
+MIRYOKU_X(TOUCH,      "Touch")
+
+#define U_BASE       0
+#define U_WIN        1
+#define U_EXTRA      2
+#define U_TAP        3
+#define U_BUTTON     4
+#define U_NAV        5
+#define U_MOUSE      6
+#define U_MEDIA      7
+#define U_NUM        8
+#define U_SYM        9
+#define U_FUN        10
+#define U_BUTTON_WIN 11
+#define U_NAV_WIN    12
+#define U_MOUSE_WIN  13
+#define U_TOUCH      14
+
+#define U_WIN_RDO &kp LC(Y)
+#define U_WIN_PST &kp LC(V)
+#define U_WIN_CPY &kp LC(C)
+#define U_WIN_CUT &kp LC(X)
+#define U_WIN_UND &kp LC(Z)
+
+#define U_TRANS_ROW &trans, &trans, &trans, &trans, &trans, &trans, &trans, &trans, &trans, &trans
+#define U_TRANS_THUMBS U_NP, U_NP, &trans, &trans, &trans, &trans, &trans, &trans, U_NP, U_NP
+
+#define MIRYOKU_LAYER_WIN \
+U_TRANS_ROW, \
+U_TRANS_ROW, \
+U_TRANS_ROW, \
+U_TRANS_THUMBS
+
+#define MIRYOKU_LAYER_BUTTON_WIN \
+U_WIN_UND, U_WIN_CUT, U_WIN_CPY, U_WIN_PST, U_WIN_RDO, U_WIN_RDO, U_WIN_PST, U_WIN_CPY, U_WIN_CUT, U_WIN_UND, \
+U_TRANS_ROW, \
+U_WIN_UND, U_WIN_CUT, U_WIN_CPY, U_WIN_PST, U_WIN_RDO, U_WIN_RDO, U_WIN_PST, U_WIN_CPY, U_WIN_CUT, U_WIN_UND, \
+U_TRANS_THUMBS
+
+#define MIRYOKU_LAYER_NAV_WIN \
+&trans, &trans, &trans, &trans, &trans, U_WIN_RDO, U_WIN_PST, U_WIN_CPY, U_WIN_CUT, U_WIN_UND, \
+U_TRANS_ROW, \
+U_TRANS_ROW, \
+U_TRANS_THUMBS
+
+#define MIRYOKU_LAYER_MOUSE_WIN MIRYOKU_LAYER_NAV_WIN
+
+// thumb keys become mouse buttons while touching the trackpad
+#define MIRYOKU_LAYER_TOUCH \
+U_TRANS_ROW, \
+U_TRANS_ROW, \
+U_TRANS_ROW, \
+U_NP, U_NP, U_BTN3, U_BTN1, U_BTN2, U_BTN1, U_BTN2, U_BTN3, U_NP, U_NP
+
+#define MIRYOKU_LAYERMAPPING_WIN MIRYOKU_MAPPING
+#define MIRYOKU_LAYERMAPPING_BUTTON_WIN MIRYOKU_MAPPING
+#define MIRYOKU_LAYERMAPPING_NAV_WIN MIRYOKU_MAPPING
+#define MIRYOKU_LAYERMAPPING_MOUSE_WIN MIRYOKU_MAPPING
+#define MIRYOKU_LAYERMAPPING_TOUCH MIRYOKU_MAPPING
+
+// Media layer with the Windows mode toggle in the unused left inner top key
+#if !defined (MIRYOKU_LAYERS_FLIP) && !defined (MIRYOKU_NAV_INVERTEDT)
+#define MIRYOKU_LAYER_MEDIA \
+U_BOOT,            &u_to_U_TAP,       &u_to_U_EXTRA,     &u_to_U_BASE,      &u_tog_U_WIN,      U_RGB_TOG,         U_RGB_EFF,         U_RGB_HUI,         U_RGB_SAI,         U_RGB_BRI,         \
+&kp LGUI,          &kp LALT,          &kp LCTRL,         &kp LSHFT,         U_NA,              U_EP_TOG,          &kp C_PREV,        &kp C_VOL_DN,      &kp C_VOL_UP,      &kp C_NEXT,        \
+U_NA,              &kp RALT,          &u_to_U_FUN,       &u_to_U_MEDIA,     U_NA,              &u_out_tog,        &u_bt_sel_0,       &u_bt_sel_1,       &u_bt_sel_2,       &u_bt_sel_3,       \
+U_NP,              U_NP,              U_NA,              U_NA,              U_NA,              &kp C_STOP,        &kp C_PP,          &kp C_MUTE,        U_NP,              U_NP
+#endif
+
 #include "../miryoku/miryoku.dtsi"
 
-// Trackpad: the vendor shield refers to its own layer indices, remap them to Miryoku layers.
-
-#define U_TOUCH 10
+MIRYOKU_DOUBLE_TAP_GUARD(u_tog_U_WIN, &tog U_WIN)
 
 / {
-  keymap {
-    touch {
-      display-name = "Touch";
-      bindings = <
-&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
-&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
-&trans &trans &trans &trans &trans &trans  &trans &trans &trans &trans &trans &trans
-                   U_BTN3 U_BTN1 U_BTN2  U_BTN1 U_BTN2 U_BTN3
-      >;
+  conditional_layers {
+    compatible = "zmk,conditional-layers";
+    button_win {
+      if-layers = <U_BUTTON U_WIN>;
+      then-layer = <U_BUTTON_WIN>;
     };
+    nav_win {
+      if-layers = <U_NAV U_WIN>;
+      then-layer = <U_NAV_WIN>;
+    };
+    mouse_win {
+      if-layers = <U_MOUSE U_WIN>;
+      then-layer = <U_MOUSE_WIN>;
+    };
+  };
+
+  u_zip_zoom_mapper_win: u_zip_zoom_mapper_win {
+    compatible = "zmk,input-processor-zoom";
+    #input-processor-cells = <0>;
+    event-code = <INPUT_REL_MISC>;
+    sensitivity = <10>;
+    bindings = <&kp LC(MINUS)>, <&kp LC(EQUAL)>;
+    track-remainders;
+  };
+
+  u_swipe_button_mapper_win: u_swipe_button_mapper_win {
+    compatible = "zmk,input-processor-behaviors";
+    #input-processor-cells = <0>;
+    codes = <INPUT_BTN_NORTH INPUT_BTN_EAST INPUT_BTN_SOUTH INPUT_BTN_WEST>;
+    bindings = <&kp LG(TAB)>, <&kp LG(RIGHT)>, <&kp LG(D)>, <&kp LG(LEFT)>;
   };
 };
 
-// thumb keys become mouse buttons while touching the trackpad
+// Trackpad: the vendor shield refers to its own layer indices, remap them to Miryoku layers.
+
 &is_touching_processor {
   bindings = <&mo U_TOUCH>;
 };
 
-// trackpad scrolls while the Nav layer is held
+// scroll at half the vendor speed (1/40 instead of 1/20)
 &trackpad_listener {
+  input-processors = <&zip_xy_scaler 100 100>, <&zip_scroll_scaler 1 40>, <&zip_zoom_mapper>, <&is_touching_processor>, <&swipe_button_mapper>;
+  // trackpad scrolls while the Nav layer is held
+  // keep the touch processor so a touch release during Nav still exits the Touch layer
   scroller {
     layers = <U_NAV>;
+    input-processors = <&zip_xy_to_scroll_mapper>, <&zip_scroll_scaler 1 40>, <&zip_scroll_transform (INPUT_TRANSFORM_X_INVERT | INPUT_TRANSFORM_Y_INVERT)>, <&is_touching_processor>;
+  };
+  // Windows zoom and swipe shortcuts
+  windows {
+    layers = <U_WIN>;
+    input-processors = <&zip_xy_scaler 100 100>, <&zip_scroll_scaler 1 40>, <&u_zip_zoom_mapper_win>, <&is_touching_processor>, <&u_swipe_button_mapper_win>;
+  };
+};
+
+// Trackpad chip settings, by path as the tps43_trackpad label only exists on the right half
+&i2c0 {
+  trackpad@74 {
+    reg = <0x74>;
+    // no pinch to zoom, avoids accidental zoom (and Windows Magnifier) when resting a finger
+    /delete-property/ zoom;
+    // faster wake from low power: stay in LP1 for 5 minutes, and poll LP2 at the chip default of 160ms instead of 640ms
+    timeout-lp1 = <15>;
+    report-rate-lp2 = <160>;
   };
 };
